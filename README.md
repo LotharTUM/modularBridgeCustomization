@@ -7,7 +7,7 @@ This repository contains a software prototype that allows the automated product 
 Kolbeck, L.; Vilgertshofer, S.; Borrmann, A.: _Graph-based mass customization of modular precast bridge systems – Methodology for kit development and algorithmic design._ 
 Proceedings of the 30th EG-ICE International Workshop on Intelligent Computing in Engineering, 2023
 
-![](Algorithm animation.gif)
+![](algorithm_animation.gif)
 
 Feel free to contact me if you have any questions or suggestions.
 
