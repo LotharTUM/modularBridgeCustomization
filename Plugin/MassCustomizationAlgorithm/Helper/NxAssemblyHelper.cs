@@ -468,8 +468,8 @@ namespace ArchBridgeAlgorithm.Helper
             try
             {
                 Session session = Session.GetSession();
-                Session.UndoMarkId markId = session.SetUndoMark(Session.MarkVisibility.Visible, "Adding Column Panels and Bearings");
-                session.ListingWindow.WriteFullline("Starting to add column panels and bearings to modular groups");
+                Session.UndoMarkId markId = session.SetUndoMark(Session.MarkVisibility.Visible, "Adding Column Panels");
+                session.ListingWindow.WriteFullline("Starting to add column panels to modular groups");
 
                 foreach (SubsystemModularGroup modularGroup in substructure.ModularGroups)
                 {
@@ -508,13 +508,6 @@ namespace ArchBridgeAlgorithm.Helper
 
                             //geometric input for placement
                             Point3d targetPoint1 = panel.LowerZMidPoint;
-                            //fetch offset of four point connector in knee node from steering sketch axis
-                            // tbd: instead of hardcoding 20 mm as a concrete coverage of four point connector, better get parameter
-                            //if (panel.ContainingColumn.KneeNode != null)
-                            //{
-                            //    if (panel.ContainingColumn.BeforeXZSymmetryPlane) { targetPoint1.Y = targetPoint1.Y + 20.0; }
-                            //    else { targetPoint1.Y = targetPoint1.Y - 20.0; }
-                            //}
                             Matrix3x3 unit1 = GeometryHelper.GetUnitMatrix();
                             addComponentBuilder1.SetInitialLocationAndOrientation(targetPoint1, unit1);
                             addComponentBuilder1.SetScatterOption(true);

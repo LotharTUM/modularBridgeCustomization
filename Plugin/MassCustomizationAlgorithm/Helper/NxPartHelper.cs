@@ -283,6 +283,8 @@ namespace ArchBridgeAlgorithm.Helper
         /// </summary>
         public static bool CreateUniqueColumnPanelParts(Substructure substructure, string columnDir, char prefix)
         {
+            //tbd 5.4: analyze why 5 type 1 get produced and why part 4 does not get inserted data
+
             try
             {
                 #region config
@@ -318,8 +320,8 @@ namespace ArchBridgeAlgorithm.Helper
                 /// Generate family for type 1 
                 #region familyType1
                 // Get Columns of first and second modular group where type 3 appears 
-                List<SubsystemColumn> columnsOfFirstModularGroupType1 = substructure.ModularGroups.First().Columns.Where(c => c.ZOrderedPanels.Count == 1).ToList();
-                List<SubsystemColumn> columnsOfSecondModularGroupType1 = substructure.ModularGroups.Last().Columns.Where(c => c.ZOrderedPanels.Count == 1).ToList();
+                List<SubsystemColumn> columnsOfFirstModularGroupType1 = substructure.ModularGroups.First().Columns.Where(c => c.ZOrderedPanels.Count > 1).ToList();
+                List<SubsystemColumn> columnsOfSecondModularGroupType1 = substructure.ModularGroups.Last().Columns.Where(c => c.ZOrderedPanels.Count > 1).ToList();
 
                 // To create a part family, we need to temporarily add the part to the current work part
                 Matrix3x3 matrix = GeometryHelper.GetUnitMatrix();
@@ -399,7 +401,7 @@ namespace ArchBridgeAlgorithm.Helper
                 // Get Columns of first and second modular group where type 3 appears 
                 List<SubsystemColumn> columnsOfFirstModularGroupType3 = substructure.ModularGroups.First().Columns.Where(c => c.ZOrderedPanels.Count > 1).ToList();
                 List<SubsystemColumn> columnsOfSecondModularGroupType3 = substructure.ModularGroups.Last().Columns.Where(c => c.ZOrderedPanels.Count > 1).ToList();
-                int numberOfUniquePanelsType3 = columnsOfFirstModularGroupType3.Where(c => c.ZOrderedPanels.Count == 3).ToList().Count;
+                //int numberOfUniquePanelsType3 = columnsOfFirstModularGroupType3.Where(c => c.ZOrderedPanels.Count == 3).ToList().Count;
 
                 // To create a part family, we need to temporarily add the part to the current work part
                 PartLoadStatus plsType3;
@@ -433,6 +435,7 @@ namespace ArchBridgeAlgorithm.Helper
                 substructure.Part.ComponentAssembly.RemoveComponent(panelModuleType3Component);
                 #endregion familyType3
 
+
                 /// Generate family for type 4 
                 #region familyType4
                 // Get Columns of first and second modular group where type 4 appears 
@@ -441,9 +444,11 @@ namespace ArchBridgeAlgorithm.Helper
 
                 if (columnsOfFirstModularGroupType4.Count > 0)
                 {
-
-                    Component panelModuleType4Component = session.Parts.Work.ComponentAssembly.AddComponent(columnPanelType4Part, "", "Column Panel Type4 Parent", new Point3d(0.0, 0.0, 0.0), matrix, -1, out pls6);
+                    PartLoadStatus plsType4;
+                    Component panelModuleType4Component = session.Parts.Work.ComponentAssembly.AddComponent(columnPanelType4Part, "", "Column Panel Type4 Parent", new Point3d(0.0, 0.0, 0.0), matrix, -1, out plsType4);
                     session.Parts.SetWork(columnPanelType4Part);
+                    ErrorList errorList4 = session.Parts.Work.ComponentAssembly.ReplaceReferenceSetInOwners("Empty", new Component[] { panelModuleType4Component });
+
                     TemplateManager templateManager4 = columnPanelType4Part.NewPartFamilyTemplateManager();
                     templateManager4.SaveDirectory = columnDir;
                     if (templateManager4.GetPartFamilyTemplate() != null) templateManager4.DeletePartFamily();
@@ -498,7 +503,7 @@ namespace ArchBridgeAlgorithm.Helper
 
                     if (singleColumnOfFirstModularGroup.ZOrderedPanels.Where(p => p.Type == ColumnPanelTypeSpecification.Type1).Any())
                     {
-                        pathToColumnPanelModuleType1FamilyMember = string.Format("{0}\\{1}{2}{3}.prt", columnDir, "KneeNodeOrBoxFoundation_Panel_OtherPanelType2or3 ", prefix.ToString(), (idxType1 + 1).ToString());
+                        pathToColumnPanelModuleType1FamilyMember = string.Format("{0}\\{1}{2}{3}.prt", columnDir, "ColumnPanel Type1 KneeNodeOrBoxFoundation_Panel_OtherPanelType2or3 ", prefix.ToString(), (idxType1 + 1).ToString());
                         columnPanelType1FamilyMemberPart = session.Parts.Open(pathToColumnPanelModuleType1FamilyMember, out plsMemberType1);
                         idxType1++;
                     }
@@ -526,7 +531,7 @@ namespace ArchBridgeAlgorithm.Helper
 
                 
 
-                    // get panels from columns
+                    // set parts in columns
                     for (int k = 0; k < singleColumnOfFirstModularGroup.ZOrderedPanels.Count; k++)
                     {
                         ModuleColumnPanel moduleOfFirstModularGroup = singleColumnOfFirstModularGroup.ZOrderedPanels.ElementAt(k);
@@ -534,8 +539,8 @@ namespace ArchBridgeAlgorithm.Helper
 
                         if (moduleOfFirstModularGroup.Type == ColumnPanelTypeSpecification.Type1)
                         {
-                            moduleOfFirstModularGroup.SetPart(columnPanelType1Part);
-                            moduleOfSecondModularGroup.SetPart(columnPanelType1Part);
+                            moduleOfFirstModularGroup.SetPart(columnPanelType1FamilyMemberPart);
+                            moduleOfSecondModularGroup.SetPart(columnPanelType1FamilyMemberPart);
                         }
 
                         else if (moduleOfFirstModularGroup.Type == ColumnPanelTypeSpecification.Type2)

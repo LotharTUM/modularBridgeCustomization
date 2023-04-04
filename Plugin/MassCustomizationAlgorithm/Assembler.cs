@@ -45,9 +45,9 @@ namespace ArchBridgeAlgorithm
             partsToOpen[7] = localRootPath + "\\Foundations\\FoundationHigherY.prt";
             partsToOpen[8] = localRootPath + "\\Foundations\\AbutmentLowerY.prt";
             partsToOpen[9] = localRootPath + "\\Foundations\\AbutmentHigherY.prt";
-
             partsToOpen[10] = localRootPath + "\\Substructure\\FourPointConnector.prt";
             partsToOpen[11] = localRootPath + "\\Foundations\\TemporaryJoint.prt";
+            partsToOpen[12] = localRootPath + "\\Substructure\\Traverse\\Traverse.prt";
 
             int i = 0;
             foreach (string path in partsToOpen)
@@ -163,12 +163,12 @@ namespace ArchBridgeAlgorithm
             bool succeeded12 = NxAssemblyHelper.TrimSteeringSketchWithKneeNodes(substructure);
             if (succeeded12) session.ListingWindow.WriteFullline("Faces of knee nodes imported and steering sketches of modular groups sucessfully trimmed");
 
-            //bool succeeded20 = TopologyHelper.GenerateArchPanelObjects(substructure);
-            //if (succeeded20) session.ListingWindow.WriteFullline("Topology and type of all arch elements computed.");
-            //bool succeeded22 = NxPartHelper.CreateUniqueArchPanelParts(substructure, configuration.ArchPanelDir, configuration.ComponentNamePrefix);
-            //if (succeeded22) session.ListingWindow.WriteFullline("Unique Arch Panel Module Parts generated");
-            //bool succeeded23 = NxAssemblyHelper.AddArchPanelsToModularGroups(substructure);
-            //if (succeeded23) session.ListingWindow.WriteFullline("Arch panel components added to both modular groups");
+            bool succeeded20 = TopologyHelper.GenerateArchPanelObjects(substructure);
+            if (succeeded20) session.ListingWindow.WriteFullline("Topology and type of all arch elements computed.");
+            bool succeeded22 = NxPartHelper.CreateUniqueArchPanelParts(substructure, configuration.ArchPanelDir, configuration.ComponentNamePrefix);
+            if (succeeded22) session.ListingWindow.WriteFullline("Unique Arch Panel Module Parts generated");
+            bool succeeded23 = NxAssemblyHelper.AddArchPanelsToModularGroups(substructure);
+            if (succeeded23) session.ListingWindow.WriteFullline("Arch panel components added to both modular groups");
             #endregion archGeneration
 
             // Generation of all column elements and their placement
@@ -186,40 +186,40 @@ namespace ArchBridgeAlgorithm
             #endregion columnGeneration
 
             /// Generating and placing all tendons
-            //session.ListingWindow.WriteFullline("");
-            //session.ListingWindow.WriteFullline("SECTION #4 of model generation algorithm: Creating, adding and orienting tendons in both columns and archs");
-            //#region tendonGeneration
-            //bool succeeded50 = TopologyHelper.GenerateTendonObjectsInArchs(substructure);
-            //if (succeeded50) session.ListingWindow.WriteFullline("Successfully computed topology and types of all tendons in archs.");
-            //bool succeeded52 = NxPartHelper.CreateUniqueTendonPartsForArchs(substructure, configuration.TendonDir, configuration.ComponentNamePrefix);
-            //if (succeeded52) session.ListingWindow.WriteFullline("Successfully generated unique tendon parts for archs");
-            //bool succeeded53 = NxAssemblyHelper.AddTendonsToArchsInModularGroups(substructure);
-            //if (succeeded53) session.ListingWindow.WriteFullline("Sucessfully added tendon components to archs");
-            //bool succeeded54 = TopologyHelper.GenerateTendonObjectsInColumns(substructure);
-            //if (succeeded54) session.ListingWindow.WriteFullline("Successfully computed topology and types of all tendons in columns.");
-            //bool succeeded55 = NxPartHelper.CreateUniqueTendonPartsForColumns(substructure, configuration.TendonDir, configuration.ComponentNamePrefix);
-            //if (succeeded55) session.ListingWindow.WriteFullline("Successfully generated unique tendon parts for columns");
-            //bool succeeded56 = NxAssemblyHelper.AddTendonsToColumnsInModularGroups(substructure);
-            //if (succeeded56) session.ListingWindow.WriteFullline("Sucessfully added tendon components to columns");
-            //#endregion tendonGeneration
+            session.ListingWindow.WriteFullline("");
+            session.ListingWindow.WriteFullline("SECTION #4 of model generation algorithm: Creating, adding and orienting tendons in both columns and archs");
+            #region tendonGeneration
+            bool succeeded50 = TopologyHelper.GenerateTendonObjectsInArchs(substructure);
+            if (succeeded50) session.ListingWindow.WriteFullline("Successfully computed topology and types of all tendons in archs.");
+            bool succeeded52 = NxPartHelper.CreateUniqueTendonPartsForArchs(substructure, configuration.TendonDir, configuration.ComponentNamePrefix);
+            if (succeeded52) session.ListingWindow.WriteFullline("Successfully generated unique tendon parts for archs");
+            bool succeeded53 = NxAssemblyHelper.AddTendonsToArchsInModularGroups(substructure);
+            if (succeeded53) session.ListingWindow.WriteFullline("Sucessfully added tendon components to archs");
+            bool succeeded54 = TopologyHelper.GenerateTendonObjectsInColumns(substructure);
+            if (succeeded54) session.ListingWindow.WriteFullline("Successfully computed topology and types of all tendons in columns.");
+            bool succeeded55 = NxPartHelper.CreateUniqueTendonPartsForColumns(substructure, configuration.TendonDir, configuration.ComponentNamePrefix);
+            if (succeeded55) session.ListingWindow.WriteFullline("Successfully generated unique tendon parts for columns");
+            bool succeeded56 = NxAssemblyHelper.AddTendonsToColumnsInModularGroups(substructure);
+            if (succeeded56) session.ListingWindow.WriteFullline("Sucessfully added tendon components to columns");
+            #endregion tendonGeneration
 
-            ///// Traverses
-            //session.ListingWindow.WriteFullline("");
-            //session.ListingWindow.WriteFullline("SECTION #5 of model generation algorithm: Adding Traverses");
-            //bool succeeded60 = TopologyHelper.GenerateTraverseObjects(substructure);
-            //bool succeeded61 = NxAssemblyHelper.AddTraverses(substructure, traversesPart);
-            //session.Parts.SetActiveDisplay(entireBridgePart, DisplayPartOption.ReplaceExisting, PartDisplayPartWorkPartOption.SameAsDisplay, out pls2);
-            //session.Parts.SetWork(entireBridgePart);
+            /// Traverses
+            session.ListingWindow.WriteFullline("");
+            session.ListingWindow.WriteFullline("SECTION #5 of model generation algorithm: Adding Traverses");
+            bool succeeded60 = TopologyHelper.GenerateTraverseObjects(substructure);
+            bool succeeded61 = NxAssemblyHelper.AddTraverses(substructure, traversesPart);
+            session.Parts.SetActiveDisplay(entireBridgePart, DisplayPartOption.ReplaceExisting, PartDisplayPartWorkPartOption.SameAsDisplay, out pls2);
+            session.Parts.SetWork(entireBridgePart);
 
-            /////// Post - processing the model structure and views by grouping the created parts another time and setting view and work part
-            //session.ListingWindow.WriteFullline("");
-            //session.ListingWindow.WriteFullline("SECTION #5 of Design Algorithm: Post-processing model structure");
-            //bool succeeded71 = NxAssemblyHelper.GroupArchs(substructure, configuration.ContainerDir, configuration.ComponentNamePrefix);
-            //if (succeeded71) session.ListingWindow.WriteFullline("Archs sucessfully grouped in nx model structure");
-            //bool succeeded72 = NxAssemblyHelper.GroupColumns(substructure, configuration.ContainerDir, configuration.ComponentNamePrefix);
-            //if (succeeded72) session.ListingWindow.WriteFullline("Columns sucessfully grouped in nx model structure");
-            //PartLoadStatus pls3;
-            //session.Parts.SetActiveDisplay(entireBridgePart, DisplayPartOption.ReplaceExisting, PartDisplayPartWorkPartOption.SameAsDisplay, out pls3);
+            ///// Post - processing the model structure and views by grouping the created parts another time and setting view and work part
+            session.ListingWindow.WriteFullline("");
+            session.ListingWindow.WriteFullline("SECTION #5 of Design Algorithm: Post-processing model structure");
+            bool succeeded71 = NxAssemblyHelper.GroupArchs(substructure, configuration.ContainerDir, configuration.ComponentNamePrefix);
+            if (succeeded71) session.ListingWindow.WriteFullline("Archs sucessfully grouped in nx model structure");
+            bool succeeded72 = NxAssemblyHelper.GroupColumns(substructure, configuration.ContainerDir, configuration.ComponentNamePrefix);
+            if (succeeded72) session.ListingWindow.WriteFullline("Columns sucessfully grouped in nx model structure");
+            PartLoadStatus pls3;
+            session.Parts.SetActiveDisplay(entireBridgePart, DisplayPartOption.ReplaceExisting, PartDisplayPartWorkPartOption.SameAsDisplay, out pls3);
             return substructure;
 
         }

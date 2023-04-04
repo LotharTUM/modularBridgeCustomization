@@ -286,27 +286,24 @@ namespace ArchBridgeAlgorithm.Helper
                         List<ModuleColumnPanel> columnPanels = new List<ModuleColumnPanel>();
                         int numberOfPanels = 0;
                         double panelLength = 0.0;
+                        double maxPanelLength = 4000.0; //constraint to ensure robotic fabrication and simple logistics
                         double columnLength = column.SketchGeo.EndPoint.Z - column.SketchGeo.StartPoint.Z;
                         List<Point3d> unorderedPoints = new List<Point3d>() { column.SketchGeo.EndPoint, column.SketchGeo.StartPoint };
                         Point3d startPoint = unorderedPoints.OrderBy(p => p.Z).First();
                         Point3d endPoint = unorderedPoints.OrderBy(p => p.Z).Last();
 
                         //Determination of number of panels and their length
-                        if (columnLength <= 3500.0)
+                        if (columnLength <= maxPanelLength)
                         {
                             numberOfPanels = 1;
                             ColumnPanelTypeSpecification type = ColumnPanelTypeSpecification.Type4;
                             ModuleColumnPanel moduleColumnPanel = new ModuleColumnPanel(column, type, startPoint, endPoint);
                             columnPanels.Add(moduleColumnPanel);
                         }
-                        else if (columnLength > 3500.0 && columnLength <= 10500.0)
-                        {
-                            numberOfPanels = (int)Math.Round(columnLength / 3500.0);
-                        }
+                        else if (columnLength > maxPanelLength && columnLength <= 3*maxPanelLength) numberOfPanels = (int)Math.Ceiling(columnLength / maxPanelLength);
                         else throw new Exception("column length too great");
-                        panelLength = columnLength / panelLength;
 
-
+                        panelLength = columnLength / numberOfPanels;
                         if (numberOfPanels > 1)
                         {
                             //geometrical preprocessing, relevant only if there is more than one panel involved
@@ -323,16 +320,16 @@ namespace ArchBridgeAlgorithm.Helper
                                     Point3d lowerZPoint = alignmentPoints.ElementAt(j);
                                     Point3d higherZPoint = alignmentPoints.ElementAt(j + 1);
                                     if (j == 0) type = ColumnPanelTypeSpecification.Type1;
-                                    else if (j < numberOfPanels - 1) type = ColumnPanelTypeSpecification.Type2;
-                                    else if (j == numberOfPanels - 1) type = ColumnPanelTypeSpecification.Type3;
+                                    else if (j == 1 && numberOfPanels == 3) type = ColumnPanelTypeSpecification.Type2;
+                                    else if ((j == 1 && numberOfPanels == 2) || (j == 2 && numberOfPanels == 3)) type = ColumnPanelTypeSpecification.Type3;
                                     ModuleColumnPanel moduleColumnPanel = new ModuleColumnPanel(column, type, lowerZPoint, higherZPoint);
                                     columnPanels.Add(moduleColumnPanel);
                                 }
                             }
-
-                            column.ZOrderedPanels.AddRange(columnPanels);
-                            column.SetColumnPanels(columnPanels);
                         }
+                        column.ZOrderedPanels.AddRange(columnPanels);
+                        column.SetColumnPanels(columnPanels);
+
                     }
                 }
                 return true;

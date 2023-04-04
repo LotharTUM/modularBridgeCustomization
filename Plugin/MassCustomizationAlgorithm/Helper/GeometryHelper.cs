@@ -59,24 +59,16 @@ namespace ArchBridgeAlgorithm.Helper
         /// </summary>
         public static List<Point3d> SubdivideColumn(Point3d startPoint, Point3d endPoint, int numberOfPanels, double panelLength, bool isArchColumn)
         {
-
+            //return type data structure and addition of midpoints
             List<Point3d> zOrderedinterpolationPoints = new List<Point3d>();
-
-            //basic calculation parameters and checks
-            double columnHeight = Math.Abs(endPoint.Z - startPoint.Z);
-
-            //data structure and first point
             zOrderedinterpolationPoints.Add(startPoint);
-            
-            zOrderedinterpolationPoints.Add(new Point3d(startPoint.X, startPoint.Y, startPoint.Z + panelLength));
-
-            if (numberOfPanels == 2) zOrderedinterpolationPoints.Add(endPoint);
+            if (numberOfPanels == 2) zOrderedinterpolationPoints.Add(new Point3d(startPoint.X, startPoint.Y, startPoint.Z + panelLength));
             if (numberOfPanels == 3)
             {
-                zOrderedinterpolationPoints.Add(new Point3d(startPoint.X, startPoint.Y, startPoint.Z + 2*panelLength));
-                zOrderedinterpolationPoints.Add(endPoint);
+                zOrderedinterpolationPoints.Add(new Point3d(startPoint.X, startPoint.Y, startPoint.Z + panelLength));
+                zOrderedinterpolationPoints.Add(new Point3d(startPoint.X, startPoint.Y, startPoint.Z + 2 * panelLength));
             }
-
+            zOrderedinterpolationPoints.Add(endPoint);
 
             //if the type 3 is very small and we have a lateral column, we can just move up the box foundation a little in the terrain to spare the extra part
             double currentHeightType3 = Math.Abs(zOrderedinterpolationPoints.ElementAt(zOrderedinterpolationPoints.Count-2).Z - zOrderedinterpolationPoints.Last().Z);
@@ -95,6 +87,9 @@ namespace ArchBridgeAlgorithm.Helper
             
             return zOrderedinterpolationPoints;
         }
+
+
+
 
         public static double GetInclinationToPositiveY(Line line)
         {
