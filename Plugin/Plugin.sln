@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32428.217
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassCustomizationAlgorithm", "MassCustomizationAlgorithm\MassCustomizationAlgorithm.csproj", "{A8FB4B89-D551-4880-A61C-4B89077B8589}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassCustomizationDataModel", "MassCustomizationDataModel\MassCustomizationDataModel.csproj", "{0D23F7D1-ECF1-4F53-965C-1C084E8E6052}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A8FB4B89-D551-4880-A61C-4B89077B8589}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8FB4B89-D551-4880-A61C-4B89077B8589}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8FB4B89-D551-4880-A61C-4B89077B8589}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8FB4B89-D551-4880-A61C-4B89077B8589}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D23F7D1-ECF1-4F53-965C-1C084E8E6052}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D23F7D1-ECF1-4F53-965C-1C084E8E6052}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D23F7D1-ECF1-4F53-965C-1C084E8E6052}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D23F7D1-ECF1-4F53-965C-1C084E8E6052}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {11880130-2ACD-4420-BE51-18CA722A2269}
+	EndGlobalSection
+EndGlobal

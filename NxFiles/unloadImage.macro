@@ -1,0 +1,25 @@
+﻿NX 1965
+Macro File: C:\Users\ga24nix\source\repos\ModularArchBridge2\NX\unloadImage.macro
+Macro Version 7.50
+Macro List Language and Codeset: german 17
+Created by ga24nix on Fri Sep 30 18:03:26 2022
+Part Name Display Style: $FILENAME
+Selection Parameters 0 2 0.229167 1
+Display Parameters 1.000000 21.062500 11.843750 -1.000000 -6.562315 1.000000 -5.437685
+*****************
+RESET
+MENU, 0, UG_FILE_UTILITIES_UNLOAD_SHARED_IMAGE UG_GATEWAY_MAIN_MENUBAR <RibbonFileBar->BackStageBar->LeftBackStageGroup->UG_FILE_UTILITIES_MENU> ## ! 
+DIALOG_BEGIN "Unload Shared Image" 0 ! Special
+ BEG_ITEM  0 (1 MULT 0) = 0  ! List (Items selected)
+  BEG_ITEM  1 (1 WIDE 0) = ""  ! Image Name
+  EVENT VALUE_CHANGED -10 0, 0, 0, 0, 0!  
+  ASK_ITEM  0 (1 MULT 0) = 1  ! List
+       POSITION = 0 "C:\Users\ga24nix\source\repos\modularBridgeCustomization\Plugin\MassCustomizationAlgorithm\bin\Debug\MassCustomizationAlgorithm.dll" ! Index/contents of selected item
+ END_ITEM  0 (1 MULT 0) = 1  ! List (Items selected)
+      POSITION = 0 "C:\Users\ga24nix\source\repos\modularBridgeCustomization\Plugin\MassCustomizationAlgorithm\bin\Debug\MassCustomizationAlgorithm.dll" ! Index/contents of selected item
+  END_ITEM  1 (1 WIDE 0) = "C:\Users\ga24nix\source\repos\ModularArchBridge2\ModularArchBridge\bin\Debug\ModularArchBridge.dll" ! Image Name
+DIALOG_END -2, 0 ! Unload Shared Image: OK
+DIALOG_BEGIN "Unload Shared Image" 0 ! Special
+ BEG_ITEM  0 (1 MULT 0) = 0  ! List (Items selected)
+  BEG_ITEM  1 (1 WIDE 0) = ""  ! Image Name
+DIALOG_END -3, 0 ! Unload Shared Image: CANCEL
