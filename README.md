@@ -2,13 +2,12 @@
 
 ## Context
 
-This repository contains a software prototype that allows the automated product model generation for a modular bridge system. \
-The underyling concepts are described in the following conference article:
+This repository contains a software prototype that allows the automated product model generation for a modular bridge system. The underyling concepts are described in the following conference article:
 
 Kolbeck, L.; Vilgertshofer, S.; Borrmann, A.: _Graph-based mass customization of modular precast bridge systems – Methodology for kit development and algorithmic design._ 
 Proceedings of the 30th EG-ICE International Workshop on Intelligent Computing in Engineering, 2023
 
-**A video of the algorithm will be inserted here**
+![](Algorithm animation.gif)
 
 Feel free to contact me if you have any questions or suggestions.
 
@@ -17,7 +16,7 @@ The software prototype is divided into NX-Design (Version 1953) part files and a
 In order to use the plugin, you must
 - download the corresponding version of NX 
 - open the root part (ArchBridge) and run the "sessionStart.cs" journal (placed in ./NX/ressources configuring the session
-- open the plugin in visual studio and reference your local NXopen-libraries
+- open the plugin in visual studio, reference your local NXopen-libraries and adjust the path for the configuration-object
 - build the plugin-.dll 
 - run the .dll from within NX (pressing ctrl+R)
 
