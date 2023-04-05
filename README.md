@@ -17,10 +17,11 @@ In order to use the plugin, you must
 - download the corresponding version of NX 
 - open the root part (ArchBridge) and run the "sessionStart.cs" journal (placed in ./NX/ressources configuring the session
 - open the plugin in visual studio, reference your local NXopen-libraries and adjust the path for the configuration-object
-- build the plugin-.dll 
+- build the plugin-.dll in Debug Mode (you may also attach to the process via Visual studio to study the algorithm step by step)
 - run the .dll from within NX (pressing ctrl+R)
+- if you run the .dll multiple times, unload the .dll manually from the shared images (via file > tools > unload shared image)
 
 ## Helpful ressources
-- You should be familiar with NX and the used modeling principles and to understand and modify the source code. I recommend fundamental books such as the one from [Matthias Obergriesser](https://link.springer.com/book/10.1007/978-3-658-16782-0) for an introductio
+- You should be familiar with NX and the used modeling principles and to understand and modify the source code. I recommend fundamental books such as the one from [Matthias Obergriesser](https://link.springer.com/book/10.1007/978-3-658-16782-0) for an introduction
 - See the _Getting Started with NXOpen_ [guide](https://docs.plm.automation.siemens.com/data_services/resources/nx/11/nx_api/common/en_US/graphics/fileLibrary/nx/nxopen/nxopen_getting_started_v11.pdf) for a step-by-step introduction to the API.  
 
