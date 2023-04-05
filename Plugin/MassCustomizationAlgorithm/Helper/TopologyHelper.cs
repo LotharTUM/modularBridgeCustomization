@@ -291,6 +291,7 @@ namespace ArchBridgeAlgorithm.Helper
                         List<Point3d> unorderedPoints = new List<Point3d>() { column.SketchGeo.EndPoint, column.SketchGeo.StartPoint };
                         Point3d startPoint = unorderedPoints.OrderBy(p => p.Z).First();
                         Point3d endPoint = unorderedPoints.OrderBy(p => p.Z).Last();
+                        ColumnPanelAnchorage anchorage = null;
 
                         //Determination of number of panels and their length
                         if (columnLength <= maxPanelLength)
@@ -324,11 +325,13 @@ namespace ArchBridgeAlgorithm.Helper
                                     else if ((j == 1 && numberOfPanels == 2) || (j == 2 && numberOfPanels == 3)) type = ColumnPanelTypeSpecification.Type3;
                                     ModuleColumnPanel moduleColumnPanel = new ModuleColumnPanel(column, type, lowerZPoint, higherZPoint);
                                     columnPanels.Add(moduleColumnPanel);
+                                    anchorage = new ColumnPanelAnchorage(column);
                                 }
                             }
                         }
                         column.ZOrderedPanels.AddRange(columnPanels);
                         column.SetColumnPanels(columnPanels);
+                        column.SetAnchorage(anchorage);
 
                     }
                 }

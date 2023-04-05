@@ -6,6 +6,8 @@ using ArchBridgeAlgorithm.Helper;
 using NXOpen.Assemblies;
 using NXOpen.PartFamily;
 using NXOpen.Features;
+using System;
+using System.Diagnostics;
 
 namespace ArchBridgeAlgorithm
 { 
@@ -16,102 +18,108 @@ namespace ArchBridgeAlgorithm
     {
         public static void SetupSession()
         {
-            NXOpen.Session theSession = NXOpen.Session.GetSession();
-            NXOpen.Part workPart = theSession.Parts.Work;
-            NXOpen.Part displayPart = theSession.Parts.Display;
-            NXOpen.UI theUI = NXOpen.UI.GetUI();
-            theSession.CleanUpFacetedFacesAndEdges();
-
-            // Lizenz aktivieren
-            string[] bundles = new string[4] { "ACD10", "ACD11", "NXAMACAD", "SCACAD100" };
-            theSession.LicenseManager.SetBundlesForUse(bundles);
-
-            // Change journaling to c# umstellen
-            theSession.Preferences.UserInterface.JournalLanguage = NXOpen.Preferences.SessionUserInterface.JournalLanguageType.Cs;
-            theSession.Preferences.UserInterface.JournalFileFormat = NXOpen.Preferences.SessionUserInterface.JournalFileFormatType.Unicode;
-            theSession.Preferences.UserInterface.InsetMenuDialogComments = true;
-
-            // Relevante Teile öffnen
-            string localRootPath = @"C:\Users\ga24nix\source\repos\modularBridgeCustomization\NxFiles";
-            string[] partsToOpen = new string[12];
-
-            partsToOpen[0] = localRootPath + "\\Superstructure\\Superstructure.prt";
-            partsToOpen[1] = localRootPath + "\\Superstructure\\Deck.prt";
-            partsToOpen[2] = localRootPath + "\\Substructure\\Substructure.prt";
-            partsToOpen[3] = localRootPath + "\\Substructure\\ModularGroupLowerX.prt";
-            partsToOpen[4] = localRootPath + "\\Substructure\\ModularGroupHigherX.prt";
-            partsToOpen[5] = localRootPath + "\\Foundations\\Foundations.prt";
-            partsToOpen[6] = localRootPath + "\\Foundations\\FoundationLowerY.prt";
-            partsToOpen[7] = localRootPath + "\\Foundations\\FoundationHigherY.prt";
-            partsToOpen[8] = localRootPath + "\\Foundations\\AbutmentLowerY.prt";
-            partsToOpen[9] = localRootPath + "\\Foundations\\AbutmentHigherY.prt";
-            partsToOpen[10] = localRootPath + "\\Substructure\\FourPointConnector.prt";
-            partsToOpen[11] = localRootPath + "\\Foundations\\TemporaryJoint.prt";
-            partsToOpen[12] = localRootPath + "\\Substructure\\Traverse\\Traverse.prt";
-
-            int i = 0;
-            foreach (string path in partsToOpen)
+            try
             {
-                try
+                NXOpen.Session theSession = NXOpen.Session.GetSession();
+                NXOpen.Part workPart = theSession.Parts.Work;
+                theSession.CleanUpFacetedFacesAndEdges();
+
+                // Lizenz aktivieren
+                string[] bundles = new string[4] { "ACD10", "ACD11", "NXAMACAD", "SCACAD100" };
+                theSession.LicenseManager.SetBundlesForUse(bundles);
+
+                // Change journaling to c# umstellen
+                theSession.Preferences.UserInterface.JournalLanguage = NXOpen.Preferences.SessionUserInterface.JournalLanguageType.Cs;
+                theSession.Preferences.UserInterface.JournalFileFormat = NXOpen.Preferences.SessionUserInterface.JournalFileFormatType.Unicode;
+                theSession.Preferences.UserInterface.InsetMenuDialogComments = true;
+
+                // Relevante Teile öffnen
+                string localRootPath = @"C:\Users\ga24nix\source\repos\modularBridgeCustomization\NxFiles";
+                string[] partsToOpen = new string[13];
+
+                partsToOpen[0] = localRootPath + "\\Superstructure\\Superstructure.prt";
+                partsToOpen[1] = localRootPath + "\\Superstructure\\Deck.prt";
+                partsToOpen[2] = localRootPath + "\\Substructure\\Substructure.prt";
+                partsToOpen[3] = localRootPath + "\\Substructure\\ModularGroupLowerX.prt";
+                partsToOpen[4] = localRootPath + "\\Substructure\\ModularGroupHigherX.prt";
+                partsToOpen[5] = localRootPath + "\\Foundations\\Foundations.prt";
+                partsToOpen[6] = localRootPath + "\\Foundations\\FoundationLowerY.prt";
+                partsToOpen[7] = localRootPath + "\\Foundations\\FoundationHigherY.prt";
+                partsToOpen[8] = localRootPath + "\\Foundations\\AbutmentLowerY.prt";
+                partsToOpen[9] = localRootPath + "\\Foundations\\AbutmentHigherY.prt";
+                partsToOpen[10] = localRootPath + "\\Substructure\\FourPointConnector.prt";
+                partsToOpen[11] = localRootPath + "\\Foundations\\TemporaryJoint.prt";
+                partsToOpen[12] = localRootPath + "\\Substructure\\Traverse\\Traverse.prt";
+
+                int i = 0;
+                foreach (string path in partsToOpen)
                 {
-                    NXOpen.PartLoadStatus partLoadStatus;
-                    if (i <= 4)
+                    try
                     {
-                        NXOpen.BasePart basePart = theSession.Parts.OpenActiveDisplay(partsToOpen[i], NXOpen.DisplayPartOption.AllowAdditional, out partLoadStatus);
+                        NXOpen.PartLoadStatus partLoadStatus;
+                        if (i <= 4)
+                        {
+                            NXOpen.BasePart basePart = theSession.Parts.OpenActiveDisplay(partsToOpen[i], NXOpen.DisplayPartOption.AllowAdditional, out partLoadStatus);
+                        }
+                        else
+                        {
+                            NXOpen.BasePart basePart = theSession.Parts.Open(partsToOpen[i], out partLoadStatus);
+                        }
+                        partLoadStatus.Dispose();
+                        i++;
                     }
-                    else
+                    catch
                     {
-                        NXOpen.BasePart basePart = theSession.Parts.Open(partsToOpen[i], out partLoadStatus);
+                        i++;
                     }
-                    partLoadStatus.Dispose();
-                    i++;
                 }
-                catch
-                {
-                    i++;
-                }
+
+                //loading options
+                theSession.Parts.LoadOptions.LoadLatest = false;
+                theSession.Parts.LoadOptions.ComponentLoadMethod = NXOpen.LoadOptions.LoadMethod.SearchDirectories;
+                string[] searchDirectories1 = new string[8];
+
+                searchDirectories1[0] = localRootPath + "\\Substructure\\";
+                searchDirectories1[1] = localRootPath + "\\Substructure\\Bearing";
+                searchDirectories1[2] = localRootPath + "\\Substructure\\KneeNodes";
+                searchDirectories1[3] = localRootPath + "\\Substructure\\PanelModules";
+                searchDirectories1[4] = localRootPath + "\\Substructure\\PanelModules\\ArchPanels\\";
+                searchDirectories1[5] = localRootPath + "\\Substructure\\PanelModules\\ColumnPanels\\";
+                searchDirectories1[6] = localRootPath + "\\Substructure\\Tendons\\";
+                searchDirectories1[7] = localRootPath + "\\Foundations\\";
+
+
+                bool[] searchSubDirs1 = new bool[8];
+                searchSubDirs1[0] = true;
+                searchSubDirs1[1] = true;
+                searchSubDirs1[2] = true;
+                searchSubDirs1[3] = true;
+                searchSubDirs1[4] = true;
+                searchSubDirs1[5] = true;
+                searchSubDirs1[6] = true;
+                searchSubDirs1[7] = true;
+
+                theSession.Parts.LoadOptions.SetSearchDirectories(searchDirectories1, searchSubDirs1);
+                theSession.Parts.LoadOptions.ComponentsToLoad = NXOpen.LoadOptions.LoadComponents.All;
+                theSession.Parts.LoadOptions.PartLoadOption = NXOpen.LoadOptions.LoadOption.MinimallyLoadLightweightDisplay;
+                theSession.Parts.LoadOptions.SetInterpartData(false, NXOpen.LoadOptions.Parent.Partial);
+                theSession.Parts.LoadOptions.AllowSubstitution = false;
+                theSession.Parts.LoadOptions.GenerateMissingPartFamilyMembers = true;
+                theSession.Parts.LoadOptions.AbortOnFailure = false;
+                theSession.Parts.LoadOptions.OptionUpdateSubsetOnLoad = NXOpen.LoadOptions.UpdateSubsetOnLoad.None;
+
+                //set substructure display part
+                BasePart substructurePart = theSession.Parts.FindObject("ArchBridge");
+                NXOpen.PartLoadStatus pls;
+                theSession.Parts.SetDisplay(substructurePart, false, false, out pls);
+                NXOpen.Display.Camera camera1 = ((NXOpen.Display.Camera)workPart.Cameras.FindObject("Isometric"));
+                workPart.ModelingViews.WorkView.Fit();
             }
-
-            //loading options
-            theSession.Parts.LoadOptions.LoadLatest = false;
-            theSession.Parts.LoadOptions.ComponentLoadMethod = NXOpen.LoadOptions.LoadMethod.SearchDirectories;
-            string[] searchDirectories1 = new string[8];
-
-            searchDirectories1[0] = localRootPath + "\\Substructure\\";
-            searchDirectories1[1] = localRootPath + "\\Substructure\\Bearing";
-            searchDirectories1[2] = localRootPath + "\\Substructure\\KneeNodes";
-            searchDirectories1[3] = localRootPath + "\\Substructure\\PanelModules";
-            searchDirectories1[4] = localRootPath + "\\Substructure\\PanelModules\\ArchPanels\\";
-            searchDirectories1[5] = localRootPath + "\\Substructure\\PanelModules\\ColumnPanels\\";
-            searchDirectories1[6] = localRootPath + "\\Substructure\\Tendons\\";
-            searchDirectories1[7] = localRootPath + "\\Foundations\\";
-
-
-            bool[] searchSubDirs1 = new bool[8];
-            searchSubDirs1[0] = true;
-            searchSubDirs1[1] = true;
-            searchSubDirs1[2] = true;
-            searchSubDirs1[3] = true;
-            searchSubDirs1[4] = true;
-            searchSubDirs1[5] = true;
-            searchSubDirs1[6] = true;
-            searchSubDirs1[7] = true;
-
-            theSession.Parts.LoadOptions.SetSearchDirectories(searchDirectories1, searchSubDirs1);
-            theSession.Parts.LoadOptions.ComponentsToLoad = NXOpen.LoadOptions.LoadComponents.All;
-            theSession.Parts.LoadOptions.PartLoadOption = NXOpen.LoadOptions.LoadOption.MinimallyLoadLightweightDisplay;
-            theSession.Parts.LoadOptions.SetInterpartData(false, NXOpen.LoadOptions.Parent.Partial);
-            theSession.Parts.LoadOptions.AllowSubstitution = false;
-            theSession.Parts.LoadOptions.GenerateMissingPartFamilyMembers = true;
-            theSession.Parts.LoadOptions.AbortOnFailure = false;
-            theSession.Parts.LoadOptions.OptionUpdateSubsetOnLoad = NXOpen.LoadOptions.UpdateSubsetOnLoad.None;
-
-            //set substructure display part
-            BasePart substructurePart = theSession.Parts.FindObject("ArchBridge");
-            NXOpen.PartLoadStatus pls;
-            theSession.Parts.SetDisplay(substructurePart, false, false, out pls);
-            NXOpen.Display.Camera camera1 = ((NXOpen.Display.Camera)workPart.Cameras.FindObject("Isometric"));
-            workPart.ModelingViews.WorkView.Fit();
+            catch(Exception e)
+            {
+                Session session = Session.GetSession();
+                session.ListingWindow.WriteFullline("Exception thrown in session setup: " + e.ToString());
+            }
         }
 
         public static Substructure Modularize()
@@ -179,10 +187,12 @@ namespace ArchBridgeAlgorithm
             if (succeeded30) session.ListingWindow.WriteFullline("Topology and type of all column elements sucessfully computed.");
             bool succeeded31 = NxPartHelper.CreateUniqueColumnPanelParts(substructure, configuration.ColumnPanelDir, configuration.ComponentNamePrefix);
             if (succeeded31) session.ListingWindow.WriteFullline("Successfully generated unique column panel module parts");
-            bool succeeded32 = NxAssemblyHelper.AddColumnPanelsToModularGroups(substructure);
-            if (succeeded32) session.ListingWindow.WriteFullline("Column panel components added to both modular groups");
-            bool succeeded33 = NxAssemblyHelper.AddLateralColumnFoundations(substructure, configuration.FoundationDir);
-            if (succeeded33) session.ListingWindow.WriteFullline("Box Foundations added to both modular groups");
+            bool succeeded32 = NxPartHelper.CreateUniqueColumnAnchorageParts(substructure, configuration.ColumnPanelDir, configuration.ComponentNamePrefix);
+            if (succeeded32) session.ListingWindow.WriteFullline("Successfully generated unique column panel module parts");
+            bool succeeded33 = NxAssemblyHelper.AddColumnPartsToModularGroups(substructure); //add here also colum anchorages
+            if (succeeded33) session.ListingWindow.WriteFullline("Column panel components added to both modular groups");
+            bool succeeded34 = NxAssemblyHelper.AddLateralColumnFoundations(substructure, configuration.FoundationDir);
+            if (succeeded34) session.ListingWindow.WriteFullline("Box Foundations added to both modular groups");
             #endregion columnGeneration
 
             /// Generating and placing all tendons
@@ -195,12 +205,6 @@ namespace ArchBridgeAlgorithm
             if (succeeded52) session.ListingWindow.WriteFullline("Successfully generated unique tendon parts for archs");
             bool succeeded53 = NxAssemblyHelper.AddTendonsToArchsInModularGroups(substructure);
             if (succeeded53) session.ListingWindow.WriteFullline("Sucessfully added tendon components to archs");
-            bool succeeded54 = TopologyHelper.GenerateTendonObjectsInColumns(substructure);
-            if (succeeded54) session.ListingWindow.WriteFullline("Successfully computed topology and types of all tendons in columns.");
-            bool succeeded55 = NxPartHelper.CreateUniqueTendonPartsForColumns(substructure, configuration.TendonDir, configuration.ComponentNamePrefix);
-            if (succeeded55) session.ListingWindow.WriteFullline("Successfully generated unique tendon parts for columns");
-            bool succeeded56 = NxAssemblyHelper.AddTendonsToColumnsInModularGroups(substructure);
-            if (succeeded56) session.ListingWindow.WriteFullline("Sucessfully added tendon components to columns");
             #endregion tendonGeneration
 
             /// Traverses

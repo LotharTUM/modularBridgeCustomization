@@ -279,12 +279,9 @@ namespace ArchBridgeAlgorithm.Helper
         /// <summary>
         /// computes and assigns the necessary different column part files. 
         /// For each pair of columns (in the two modular groups), all elements are adapted in order to be able to cope with variable inclination.
-        /// Certainly, some optimization might be done in order to reduce the number of adapted instances of the modules, but this is intricate and would require some further thinking
         /// </summary>
         public static bool CreateUniqueColumnPanelParts(Substructure substructure, string columnDir, char prefix)
         {
-            //tbd 5.4: analyze why 5 type 1 get produced and why part 4 does not get inserted data
-
             try
             {
                 #region config
@@ -296,7 +293,7 @@ namespace ArchBridgeAlgorithm.Helper
                 session.Parts.SetWork(substructure.Part);
                 Session.UndoMarkId markId = session.SetUndoMark(Session.MarkVisibility.Visible, "Creation of unique column panel parts");
 
-                //Get the following parts as they are needed to add them to the modular groups(type1, type2, bearing) respectively to first create a family (type3)
+                //Get the following parts as they are needed to add them to the modular groups 
                 PartLoadStatus pls1, pls2, pls3, pls4, pls5, pls6;
                 Part columnPanelType1Part, columnPanelType2Part, columnPanelType3Part, columnPanelType4Part;
 
@@ -563,7 +560,6 @@ namespace ArchBridgeAlgorithm.Helper
                     }
                     idxTotal++;
                 }
-
                 #endregion assignment
 
 
@@ -580,6 +576,109 @@ namespace ArchBridgeAlgorithm.Helper
                 Session session = Session.GetSession();
                 int line = new StackTrace(e, true).GetFrame(0).GetFileLineNumber();
                 session.ListingWindow.WriteFullline("Exception thrown in PartHelper.CreateColumnPanelFamily in line: " + e.ToString());
+                return false;
+            }
+        }
+
+
+        /// <summary>
+        /// computes and assigns the column anchorage plates  
+        /// For each pair of columns (in the two modular groups), all elements are adapted in order to be able to cope with variable inclination.
+        /// </summary>
+        public static bool CreateUniqueColumnAnchorageParts(Substructure substructure, string columnDir, char prefix)
+        {
+            try
+            {
+                #region config
+                // general config, loading objs and files
+                Session.GetSession().ListingWindow.WriteFullline("Starting to generate anchorage plate family");
+                Session session = Session.GetSession();
+                PartLoadStatus partLoadStatus;
+                session.Parts.SetActiveDisplay(substructure.Part, DisplayPartOption.ReplaceExisting, PartDisplayPartWorkPartOption.SameAsDisplay, out partLoadStatus);
+                session.Parts.SetWork(substructure.Part);
+                Session.UndoMarkId markId = session.SetUndoMark(Session.MarkVisibility.Visible, "Starting to generate anchorage plate family");
+                PartLoadStatus pls1, pls2;
+                Part columnAnchoragePart = session.Parts.Work;
+                try { columnAnchoragePart = session.Parts.FindObject("ColumnAnchorage Type1") as Part; }
+                catch { columnAnchoragePart = session.Parts.Open(string.Format("{0}\\ColumnAnchorage Type1.prt", columnDir), out pls1); }
+                #endregion config
+
+                #region partGeneration
+                //columns to add/assign the anchorages to
+                List<SubsystemColumn> columnsOfFirstModularGroupType1 = substructure.ModularGroups.First().Columns.Where(c => c.ZOrderedPanels.Count > 1).ToList();
+                List<SubsystemColumn> columnsOfSecondModularGroupType1 = substructure.ModularGroups.Last().Columns.Where(c => c.ZOrderedPanels.Count > 1).ToList();
+
+                // To create a part family, we need to temporarily add the part to the current work part
+                Matrix3x3 matrix = GeometryHelper.GetUnitMatrix();
+                Component columnAnchorageComponent = session.Parts.Work.ComponentAssembly.AddComponent(columnAnchoragePart, "", "Column Panel Type1 Parent", new Point3d(0.0, 0.0, 0.0), matrix, -1, out pls2);
+                session.Parts.SetWork(columnAnchoragePart);
+                ErrorList errorList1 = session.Parts.Work.ComponentAssembly.ReplaceReferenceSetInOwners("Empty", new Component[] { columnAnchorageComponent });
+
+                TemplateManager templateManager1 = columnAnchoragePart.NewPartFamilyTemplateManager();
+                templateManager1.SaveDirectory = columnDir;
+                if (templateManager1.GetPartFamilyTemplate() != null) templateManager1.DeletePartFamily();
+                string[] attributesToAdd1 = new string[] { "length" };
+                FamilyAttribute.AttrType[] attributeTypes1 = new FamilyAttribute.AttrType[] { FamilyAttribute.AttrType.Expression };
+                templateManager1.AddToChosenAttributes(attributesToAdd1, attributeTypes1, 2);
+                Template template1 = templateManager1.CreatePartFamily();
+                List<FamilyAttribute> familyAttributes1 = new List<FamilyAttribute>();
+                familyAttributes1.Add(templateManager1.GetPartFamilyAttribute(FamilyAttribute.AttrType.Expression, attributesToAdd1[0]));
+                InstanceDefinition[] familyInstances1 = new InstanceDefinition[columnsOfFirstModularGroupType1.Count]; //as many instances as geometrically identical pairs of columns
+
+                double offset = 20.0; // to leave some tolerance to the deck
+                int i = 0;
+                foreach (SubsystemColumn column in columnsOfFirstModularGroupType1)
+                {
+                    ColumnPanelAnchorage uniqueAnchorage = column.Anchorage;
+                    familyInstances1[i] = templateManager1.AddInstanceDefinition(string.Format("{0}{1}{2}.prt", "ColumnAnchorage Type1 ", prefix.ToString(), (i + 1).ToString()), familyInstances1[i], (i + 1).ToString());
+                    familyInstances1[i].SetValueOfAttribute(familyAttributes1[0], (uniqueAnchorage.ColumnLength-offset).ToString().Replace(',', '.'));
+                    i++;
+                }
+                templateManager1.SaveFamilyAndCreateMembers(familyInstances1);
+                PartLoadStatus plsAnchorage;
+                session.Parts.SetActiveDisplay(substructure.Part, DisplayPartOption.ReplaceExisting, PartDisplayPartWorkPartOption.SameAsDisplay, out plsAnchorage);
+                substructure.Part.ComponentAssembly.RemoveComponent(columnAnchorageComponent);
+                #endregion partGeneration
+
+                #region partAssignment
+                int idxTotal = 0; //column counter
+                int idxAnchorage = 0; //counter for individual anchorage
+
+                foreach (SubsystemColumn singleColumnOfFirstModularGroup in substructure.ModularGroups.First().Columns)
+                {
+                    //get right colums from groups
+                    SubsystemColumn singleColumnOfSecondModularGroup = substructure.ModularGroups.Last().Columns.ElementAt(idxTotal);
+
+                    //find and open right part
+                    string pathToAnchorageFamilyMember = "";
+                    Part columnPanelType1FamilyMemberPart = session.Parts.Work;
+                    if (singleColumnOfFirstModularGroup.Anchorage != null)
+                    { 
+                        pathToAnchorageFamilyMember = string.Format("{0}\\{1}{2}{3}.prt", columnDir, "ColumnAnchorage Type1 ", prefix.ToString(), (idxAnchorage + 1).ToString());
+                        columnPanelType1FamilyMemberPart = session.Parts.Open(pathToAnchorageFamilyMember, out plsAnchorage);
+
+                        //add it to columns 
+                        ColumnPanelAnchorage anchorageOfFirstModularGroup = singleColumnOfFirstModularGroup.Anchorage;
+                        ColumnPanelAnchorage anchorageOfSecondModularGroup = singleColumnOfSecondModularGroup.Anchorage;
+
+                        anchorageOfFirstModularGroup.SetPart(columnPanelType1FamilyMemberPart);
+                        anchorageOfSecondModularGroup.SetPart(columnPanelType1FamilyMemberPart);
+                        idxAnchorage++;
+                    }
+                    idxTotal++;
+                }
+                
+                #endregion partAssignment
+                
+                //final config
+                session.Parts.SetActiveDisplay(substructure.Part, DisplayPartOption.ReplaceExisting, PartDisplayPartWorkPartOption.SameAsDisplay, out pls1);
+                int nErrs1 = session.UpdateManager.DoUpdate(markId);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Session session = Session.GetSession();
+                session.ListingWindow.WriteFullline("Exception thrown in anchorage part generation: "+ e.ToString());
                 return false;
             }
         }
@@ -686,7 +785,6 @@ namespace ArchBridgeAlgorithm.Helper
                     }
                     l++;
                 }
-
                 #endregion partAssignment
 
                 /// final config
@@ -707,110 +805,5 @@ namespace ArchBridgeAlgorithm.Helper
             }
         }
 
-        /// <summary>
-        /// creates and assigns tendon parts for the columns
-        /// Individual parts need to be created for pair of column, every part can be used then eight times
-        /// </summary>
-        internal static bool CreateUniqueTendonPartsForColumns(Substructure substructure, string tendonDir, char prefix)
-        {
-            try
-            {
-                ///general config, loading objs and files
-                Session session = Session.GetSession();
-                PartLoadStatus pls;
-                session.Parts.SetActiveDisplay(substructure.Part, DisplayPartOption.ReplaceExisting, PartDisplayPartWorkPartOption.SameAsDisplay, out pls);
-                session.Parts.SetWork(substructure.Part);
-                Session.UndoMarkId markId = session.SetUndoMark(Session.MarkVisibility.Visible, "Family generation of tendons for columns");
-                session.ListingWindow.WriteFullline("Starting to generate unique tendon part files for columns");
-                SubsystemModularGroup firstModularGroup = substructure.ModularGroups.First();
-                SubsystemModularGroup secondModularGroup = substructure.ModularGroups.Last();
-                int numberOfArchSegments = firstModularGroup.Arch.ArchSegments.Count;
-                //Get the part files
-                PartLoadStatus pls1, pls2, pls3, pls4;
-                Part tendonType2Part;
-                //tendon type 3 for columns
-                try { tendonType2Part = session.Parts.FindObject("Tendon Type2 Column") as Part; }
-                catch { tendonType2Part = session.Parts.Open(string.Format("{0}\\Tendon Type2 Column.prt", tendonDir), out pls1); }
-
-                /// computations for part generation of type 2. A family needs to be generated for each column with every member to be placed four times each
-                #region type2Generation
-                Matrix3x3 matrix = GeometryHelper.GetUnitMatrix();
-                Component tendonType2Component = session.Parts.Work.ComponentAssembly.AddComponent(tendonType2Part, "", "Tendon Type2 parent", new Point3d(0.0, 0.0, 0.0), matrix, -1, out pls1);
-                session.Parts.SetWork(tendonType2Part);
-                ErrorList errorList = session.Parts.Work.ComponentAssembly.ReplaceReferenceSetInOwners("Empty", new Component[] { tendonType2Component });
-
-                //family template setup
-                TemplateManager templateManager = tendonType2Part.NewPartFamilyTemplateManager();
-                templateManager.SaveDirectory = tendonDir;
-                if (templateManager.GetPartFamilyTemplate() != null) templateManager.DeletePartFamily();
-                string[] attributesToAdd = new string[] { "TendonBaseLength" };
-                FamilyAttribute.AttrType[] attributeTypes = new FamilyAttribute.AttrType[] { FamilyAttribute.AttrType.Expression };
-                templateManager.AddToChosenAttributes(attributesToAdd, attributeTypes, 2);
-                Template template = templateManager.CreatePartFamily();
-                List<FamilyAttribute> familyAttributes = new List<FamilyAttribute>();
-                familyAttributes.Add(templateManager.GetPartFamilyAttribute(attributeTypes[0], attributesToAdd[0]));
-                int numberOfUniqueTendonsType2 = firstModularGroup.Columns.Where(c => c.ZOrderedPanels.Count > 1).Count();
-                InstanceDefinition[] familyInstances = new InstanceDefinition[numberOfUniqueTendonsType2];
-
-                // population of data for every part family instance
-                int k = 1;
-                foreach (SubsystemColumn column in firstModularGroup.Columns)
-                {
-                    if (column.ZOrderedPanels.Count > 1)
-                    {
-                        Tendon characteristicTendon = column.Tendons.First();
-                        string name = string.Format("{0}{1}{2}", "Tendon Type2 Column ", prefix.ToString(), k.ToString());
-                        familyInstances[k - 1] = templateManager.AddInstanceDefinition(name, familyInstances[k - 1], k.ToString());
-                        familyInstances[k - 1].SetValueOfAttribute(familyAttributes[0], characteristicTendon.Length.ToString().Replace(',', '.'));
-                        k++;
-                    }
-                   
-                }
-
-                //save and generate parts
-                templateManager.SaveFamilyAndCreateMembers(familyInstances);
-                #endregion type2Generation
-
-                /// assignment of right types 
-                #region partAssignment
-                //third part assignment by looping through every pair of columns and simply assigning one instance of the family to each
-
-                int idxTendon = 1;
-                for (int m = 0; m<firstModularGroup.Columns.Count; m++)
-                {
-                    SubsystemColumn columnFirstModularGroup = firstModularGroup.Columns.ElementAt(m);
-                    SubsystemColumn columnSecondModularGroup = secondModularGroup.Columns.ElementAt(m);
-
-                    if (columnFirstModularGroup.ZOrderedPanels.Count > 1)
-                    {
-                        List<Tendon> tendonsType2OfModularGroupLowerX = columnFirstModularGroup.Tendons;
-                        List<Tendon> tendonsType2OfModularGroupHigherX = columnSecondModularGroup.Tendons;
-                        string pathToTendonType2FamilyInstance = string.Format("{0}\\{1}{2}{3}.prt", tendonDir, "Tendon Type2 Column ", prefix.ToString(), idxTendon.ToString());
-                        PartLoadStatus plsTendon;
-                        Part tendonType2FamilyInstance = session.Parts.Open(pathToTendonType2FamilyInstance, out plsTendon);
-                        tendonsType2OfModularGroupLowerX.ForEach(t => t.SetPart(tendonType2FamilyInstance));
-                        tendonsType2OfModularGroupHigherX.ForEach(t => t.SetPart(tendonType2FamilyInstance));
-                        idxTendon++;
-                    }
-                }
-
-                #endregion partAssignment
-
-                //final config
-                session.Parts.SetActiveDisplay(substructure.Part, DisplayPartOption.ReplaceExisting, PartDisplayPartWorkPartOption.SameAsDisplay, out pls2);
-                session.Parts.SetWork(substructure.Part);
-                substructure.Part.ComponentAssembly.RemoveComponent(tendonType2Component);
-                int nErrs1 = session.UpdateManager.DoUpdate(markId);
-                return true;
-            }
-
-            catch (Exception e)
-            {
-                Session session = Session.GetSession();
-                session.ListingWindow.WriteFullline("Exception thrown in PartHelper.CreateUniqueTendonPartsForColumns: " + e.ToString());
-
-                return false;
-            }
-        }
     }
 }

@@ -13,6 +13,7 @@ namespace ArchBridgeDataModel
         //properties
         public Line SketchGeo { get; private set; }
         public List<ModuleColumnPanel> ZOrderedPanels { get; private set; } = new List<ModuleColumnPanel>();
+        public ColumnPanelAnchorage Anchorage { get; private set; }
         public ModuleKneeNode KneeNode { get; private set; }
         //public ModuleBearing Bearing { get; private set; }
         public Support Support { get; private set; }
@@ -29,6 +30,7 @@ namespace ArchBridgeDataModel
             KneeNode = null;
             BeforeXZSymmetryPlane = beforeXZSymmetry;
             IsArchColumn = isArchColumn;
+            Anchorage = null;
         }
 
         public SubsystemColumn(Line sketchGeo, Support support, bool beforeXZSymmetry, bool isArchColumn)
@@ -38,6 +40,7 @@ namespace ArchBridgeDataModel
             KneeNode = null;
             BeforeXZSymmetryPlane = beforeXZSymmetry;
             IsArchColumn = isArchColumn;
+            Anchorage = null;
         }
 
 
@@ -59,6 +62,11 @@ namespace ArchBridgeDataModel
         {
             Tendons = tendons;
         }
-      
+
+        public void SetAnchorage(ColumnPanelAnchorage anchorage)
+        {
+            Anchorage = anchorage;
+        }
+
     }
 }

@@ -461,9 +461,9 @@ namespace ArchBridgeAlgorithm.Helper
 
 
         /// <summary>
-        /// Adds the column panel and bearing components to each modular group. 
+        /// Adds the column panel and anchorage components to each modular group. 
         /// </summary>
-        public static bool AddColumnPanelsToModularGroups(Substructure substructure)
+        public static bool AddColumnPartsToModularGroups(Substructure substructure)
         {
             try
             {
@@ -481,6 +481,7 @@ namespace ArchBridgeAlgorithm.Helper
 
                     foreach (SubsystemColumn column in modularGroup.Columns)
                     {
+                        #region panels
                         foreach (ModuleColumnPanel panel in column.ZOrderedPanels)
                         {
                             AddComponentBuilder addComponentBuilder1 = modularGroupPart.AssemblyManager.CreateAddComponentBuilder();
@@ -533,9 +534,65 @@ namespace ArchBridgeAlgorithm.Helper
                             addComponentBuilder1.Destroy();
                             session.CleanUpFacetedFacesAndEdges();
                         }
+                        #endregion panels
+
+                        #region anchorage
+                        if (column.Anchorage!= null)
+                        {
+                            AddComponentBuilder addComponentBuilder2 = modularGroupPart.AssemblyManager.CreateAddComponentBuilder();
+                            ComponentPositioner componentPositioner2;
+                            componentPositioner2 = modularGroupPart.ComponentAssembly.Positioner;
+                            componentPositioner2.ClearNetwork();
+                            componentPositioner2.BeginAssemblyConstraints();
+
+                            bool allowInterpartPositioning2;
+                            allowInterpartPositioning2 = session.Preferences.Assemblies.InterpartPositioning;
+                            Network network2 = componentPositioner2.EstablishNetwork();
+                            ComponentNetwork componentNetwork2 = ((ComponentNetwork)network2);
+                            componentNetwork2.MoveObjectsState = true;
+                            Component nullNXOpen_Assemblies_Component1 = null;
+                            componentNetwork2.DisplayComponent = nullNXOpen_Assemblies_Component1;
+                            componentNetwork2.MoveObjectsState = true;
+                            InterfaceObject nullNXOpen_Assemblies_ProductInterface_InterfaceObject2 = null;
+                            addComponentBuilder2.SetComponentAnchor(nullNXOpen_Assemblies_ProductInterface_InterfaceObject2);
+                            BasePart[] partstouse2 = new BasePart[1];
+                            Part partToBeAdded2 = column.Anchorage.Part;
+                            partstouse2[0] = partToBeAdded2;
+                            addComponentBuilder2.SetPartsToAdd(partstouse2);
+                            InterfaceObject[] productinterfaceobjects2;
+                            addComponentBuilder2.GetAllProductInterfaceObjects(out productinterfaceobjects2);
+
+                            //geometric input for placement
+                            Point3d targetPoint2 = column.ZOrderedPanels.First().LowerZMidPoint;
+                            Matrix3x3 unit2 = GeometryHelper.GetUnitMatrix();
+                            addComponentBuilder2.SetInitialLocationAndOrientation(targetPoint2, unit2);
+                            addComponentBuilder2.SetScatterOption(true);
+                            addComponentBuilder2.SetCount(1);
+                            addComponentBuilder2.ReferenceSet = "ALGO";
+                            addComponentBuilder2.Layer = -1;
+
+                            //execute the addition of the components
+                            componentNetwork2.Solve();
+                            componentPositioner2.ClearNetwork();
+                            componentPositioner2.EndAssemblyConstraints();
+                            NXOpen.PDM.LogicalObject[] logicalobjects2;
+                            addComponentBuilder2.GetLogicalObjectsHavingUnassignedRequiredAttributes(out logicalobjects2);
+                            addComponentBuilder2.ComponentName = "Column Panel";
+
+                            //assign created components to subsystem assembly graph
+                            Component addedAnchorageComponent = addComponentBuilder2.Commit() as Component;
+                            //ErrorList errorList2 = modularGroupPart.ComponentAssembly.ReplaceReferenceSetInOwners("ALGO", new Component[] { addedAnchorageComponent });
+                            Component[] nestedComponents2 = addedAnchorageComponent.GetChildren();
+                            ErrorList errorList2 = modularGroupPart.ComponentAssembly.ReplaceReferenceSetInOwners("MODEL", nestedComponents2);
+
+                            column.Anchorage.SetComponent(addedAnchorageComponent);
+                            addComponentBuilder2.Destroy();
+                            session.CleanUpFacetedFacesAndEdges();
+                        }
+                        #endregion anchorage
+
                     }
                 }
-
 
                 PartLoadStatus pls2;
                 session.Parts.SetActiveDisplay(substructure.Part, DisplayPartOption.ReplaceExisting, PartDisplayPartWorkPartOption.SameAsDisplay, out pls2);

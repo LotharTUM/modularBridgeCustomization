@@ -59,6 +59,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ColumnPanelAnchorage.cs" />
     <Compile Include="ModuleArchPanel.cs" />
     <Compile Include="ModuleColumnPanel.cs" />
     <Compile Include="ModuleKneeNode.cs" />
